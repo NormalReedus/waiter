@@ -1,0 +1,11 @@
+body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #6AD7E5;
+    height: 100vh;
+}
+h1 {
+    color: rgb(45, 45, 45);
+    font-family: sans-serif;
+}
