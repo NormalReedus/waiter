@@ -1,12 +1,12 @@
 package main
 
 import (
+	"NormalReedus/waiter/injector"
 	"errors"
 	"fmt"
 	"log"
-	"os"
-
 	"net/http"
+	"os"
 
 	flag "github.com/spf13/pflag"
 )
@@ -22,6 +22,50 @@ var defaultDirs = []string{
 }
 
 // Returns the first directory in defaultDirs that exists in CWD or an error
+
+func main() {
+	injector.ScriptInjector()
+
+	var args WaiterOptions = parseArgs()
+
+	startServer(args)
+}
+
+func startServer(args WaiterOptions) {
+	// Setup server with CLI provided or default directory
+	staticHandler := http.FileServer(http.Dir(args.directory))
+	http.Handle("/", staticHandler)
+
+	fmt.Printf("\n☕ Serving on http://localhost:%s ☕\n", args.port)
+
+	// Start server on given port
+	if err := http.ListenAndServe(":"+args.port, nil); err != nil {
+		log.Fatalln(err)
+	}
+}
+
+// func startServer(args WaiterOptions) {
+// 	// Setup server with CLI provided or default directory
+
+// 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+// 		content, err := ioutil.ReadFile(args.directory + "/index.html")
+// 		if err != nil {
+// 			log.Fatalln(err)
+// 		}
+
+// 		w.Write([]byte(content))
+// 		// http.ServeFile(w, r, "public"+r.URL.Path)
+// 		// fmt.Println(r.URL.Path)
+// 	})
+
+// 	fmt.Printf("\n☕ Serving on http://localhost:%s ☕\n", args.port)
+
+// 	// Start server on given port
+// 	if err := http.ListenAndServe(":"+args.port, nil); err != nil {
+// 		log.Fatalln(err)
+// 	}
+// }
+
 func getDefaultDir() (string, error) {
 	var directory string
 
@@ -68,32 +112,17 @@ func parseArgs() WaiterOptions {
 
 		dir, err = getDefaultDir()
 		if err != nil {
-			log.Fatal(err)
+			log.Fatalln(err)
 		}
 	} else {
 		// Check if the passed dir exists
 		_, err := os.Stat(dir)
 		if os.IsNotExist(err) {
-			log.Fatal("cannot find the directory:\n	", dir)
+			log.Fatalln("cannot find the directory:\n	", dir)
 		}
 	}
 
 	// log.Println("\nDir: "+dir, "Port: "+*portPtr, "Help: "+strconv.FormatBool(*helpPtr))
 	opts := WaiterOptions{dir, *portPtr}
 	return opts
-}
-
-func main() {
-	var args WaiterOptions = parseArgs()
-
-	// Setup server with CLI provided or default directory
-	staticHandler := http.FileServer(http.Dir(args.directory))
-	http.Handle("/", staticHandler)
-
-	fmt.Printf("\n☕ Serving on http://localhost:%s ☕\n", args.port)
-
-	// Start server on given port
-	if err := http.ListenAndServe(":"+args.port, nil); err != nil {
-		log.Fatal(err)
-	}
 }
