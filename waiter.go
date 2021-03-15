@@ -1,12 +1,12 @@
 package main
 
 import (
+	"NormalReedus/waiter/injector"
 	"errors"
 	"fmt"
 	"log"
-	"os"
-
 	"net/http"
+	"os"
 
 	flag "github.com/spf13/pflag"
 )
@@ -84,6 +84,8 @@ func parseArgs() WaiterOptions {
 }
 
 func main() {
+	injector.ScriptInjector()
+
 	var args WaiterOptions = parseArgs()
 
 	// Setup server with CLI provided or default directory
